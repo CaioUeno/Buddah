@@ -13,7 +13,7 @@ tensor::tensor()
 
 tensor::tensor(vector<int> shape, double mean, double var)
 {
-
+    srand((unsigned)time(NULL));
     default_random_engine generator(rand());
     normal_distribution<double> distribution(0, 1); // pseudo normal distribution
 
@@ -215,7 +215,6 @@ vector<double> tensor::get_row(int index)
 
 tensor tensor::transpose()
 {
-
     vector<vector<double>> rows;
     for (int i = 0; i < shape[1]; i++)
         rows.push_back(get_column(i));
@@ -230,13 +229,10 @@ vector<int> tensor::get_shape()
 
 void tensor::print_tensor()
 {
-
     for (vector<double> l : values)
     {
-
         for (double i : l)
             cout << i << " ";
-
         cout << endl;
     }
 }

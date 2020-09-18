@@ -30,7 +30,6 @@ tensor network::predict_one_sample(vector<double> sample)
         else
             result = layers[i].feed_forward(result);
 
-        // layers_output.push_back(result);
     }
 
     return result;
@@ -38,36 +37,46 @@ tensor network::predict_one_sample(vector<double> sample)
 
 void network::backpropagation(vector<double> sample, vector<double> target)
 {
-    if (layers.size() == 1)
+    if (layers.size() <= 3)
     {
-        layers[0].feed_forward(tensor(sample, 1));
-        cout << "out" << endl;
-        layers[0].output.print_tensor();
-        cout << "target" << endl;
-        tensor ttt = tensor(target, 1);
-        ttt.print_tensor();
-        layers[0].calculate_delta(tensor(sample, 1), layers[0].output - ttt);
-    }
-}
 
-void network::backpropagation(vector<vector<double>> samples, vector<vector<double>> targets)
-{
-    if (samples.size() != targets.size())
-    {
-        exit(EXIT_FAILURE);
-    }
-    
-    if (layers.size() == 1)
-    {
-        for (int i = 0; i < samples.size(); i++)
+        predict_one_sample(sample);
+        // cout << "here" << endl;
+        for (int i = layers.size() - 1; i >= 0; i--)
         {
-            layers[0].feed_forward(tensor(samples[i], 1));
-            cout << "out" << endl;
-            layers[0].output.print_tensor();
-            cout << "target" << endl;
-            tensor ttt = tensor(targets[i], 1);
-            ttt.print_tensor();
-            layers[0].calculate_delta(tensor(samples[i], 1), layers[0].output - ttt);
+            // cout << i << endl;
+
+            if (1 == layers.size())
+            {
+                tensor ttt = tensor(target, 1);
+                // cout << "target" << endl;
+                // ttt.print_tensor();
+                layers[i].calculate_delta(tensor(sample, 1), layers[i].output - ttt);
+                break;
+            }
+            else
+            {
+                if (i == 0)
+                    layers[i].calculate_delta(tensor(sample, 1), layers[i + 1]);
+
+                else if (i == layers.size() - 1)
+                {
+                    tensor ttt = tensor(target, 1);
+                    // cout << "target" << endl;
+                    // ttt.print_tensor();
+                    layers[i].calculate_delta(layers[i - 1].output, layers[i].output - ttt);
+                }
+                else
+                {
+                    layers[i].calculate_delta(layers[i - 1].output, layers[i + 1]);
+                }
+            }
         }
     }
+
+    tensor ttt = tensor(target, 1);
+    cout << "target" << endl;
+    ttt.print_tensor();
+    cout << "out" << endl;
+    layers[layers.size()-1].output.print_tensor();
 }
